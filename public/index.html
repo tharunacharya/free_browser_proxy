@@ -12,9 +12,12 @@
 		<!-- Proxy engine scripts — DO NOT remove or reorder these -->
 		<script src="/scram/scramjet.all.js"></script>
 		<script src="/baremux/index.js"></script>
+		<script src="backends.js" defer></script>
 		<script src="register-sw.js" defer></script>
 		<script src="search.js" defer></script>
 		<script src="index.js" defer></script>
+		<!-- Meter board + auto-fastest backend switcher (loads after index.js) -->
+		<script src="dashboard.js" defer></script>
 
 		<style>
 			:root {
@@ -120,6 +123,23 @@
 				z-index: 9999;
 				background: #fff;
 			}
+			/* Close/back control shown while a proxied page is open */
+			#sj-close {
+				position: fixed;
+				top: 12px;
+				left: 12px;
+				z-index: 2147483001;
+				background: rgba(13, 16, 32, 0.92);
+				color: #e8ecf6;
+				border: 1px solid rgba(255, 255, 255, 0.2);
+				border-radius: 10px;
+				padding: 8px 14px;
+				font-size: 13px;
+				font-weight: 600;
+				cursor: pointer;
+				box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+			}
+			#sj-close:hover { background: rgba(255, 90, 90, 0.9); }
 		</style>
 	</head>
 

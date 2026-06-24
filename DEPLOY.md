@@ -47,6 +47,33 @@ that sends an HTTP request to your URL every ~10 minutes.
 
 ---
 
+## Speed, switching & the meter board
+
+The site has a floating **meter board** (bottom-right) showing live **latency**,
+**download/upload speed**, and the **exit country / IP / ISP** that websites see.
+
+To actually get *faster* you need something to switch between. The biggest wins:
+
+1. **Deploy in a region near you.** `render.yaml` defaults to **Singapore**
+   (closest for India). Change `region:` (singapore | frankfurt | oregon | ohio |
+   virginia) if you're elsewhere — this is the #1 latency factor.
+2. **Keep it awake** (Step 3 above) — cold starts are the worst slowdown.
+3. **Add more backends and let it auto-pick the fastest.** Deploy this same repo a
+   second/third time in *different* regions (each as its own Render service with a
+   distinct `REGION_LABEL`), then list their URLs in [`public/backends.js`](public/backends.js):
+   ```js
+   window.PROXY_BACKENDS = [
+     { label: "Frankfurt", url: "https://your-eu-app.onrender.com" },
+     { label: "Ohio (US)", url: "https://your-us-app.onrender.com" },
+   ];
+   ```
+   The dashboard pings each, and in **Auto** mode keeps the fastest one active.
+   Click any backend to switch manually (reloads the open page through it).
+
+> Honest note: switching between equally-tiny free servers makes the proxy
+> *resilient and self-optimizing*, not blazing. One small free instance has a hard
+> ceiling (0.1 CPU). Region + keep-alive matter more than the number of backends.
+
 ## Notes & gotchas
 
 - **Use Chrome or Edge.** The proxy relies on a Service Worker, which needs HTTPS —

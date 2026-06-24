@@ -9,7 +9,9 @@ services:
     name: freebrowse
     runtime: node
     plan: free
-    region: oregon          # change to frankfurt / singapore if closer to you
+    # Pick the region CLOSEST to you — this is the single biggest speed factor.
+    # Options: singapore | frankfurt | oregon | ohio | virginia
+    region: singapore       # closest for India / South-East Asia
     branch: main
     buildCommand: npm install
     startCommand: node src/index.js
@@ -17,3 +19,7 @@ services:
     envVars:
       - key: NODE_VERSION
         value: "22"          # app requires Node >=16; 22 is current LTS
+      # Shown as this backend's name in the on-site meter board. Set a distinct
+      # label per deployment (e.g. "Singapore", "Frankfurt") when you run several.
+      - key: REGION_LABEL
+        value: "Singapore"
