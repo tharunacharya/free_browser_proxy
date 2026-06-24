@@ -1,0 +1,19 @@
+# Render Blueprint — deploys this app as a free web service.
+# Render reads this automatically when you choose "New > Blueprint".
+# Docs: https://render.com/docs/blueprint-spec
+#
+# NOTE: the service name deliberately avoids the word "proxy" — Render has
+# suspended projects merely *named* "proxy". Rename freely, but keep it neutral.
+services:
+  - type: web
+    name: freebrowse
+    runtime: node
+    plan: free
+    region: oregon          # change to frankfurt / singapore if closer to you
+    branch: main
+    buildCommand: npm install
+    startCommand: node src/index.js
+    autoDeploy: true
+    envVars:
+      - key: NODE_VERSION
+        value: "22"          # app requires Node >=16; 22 is current LTS

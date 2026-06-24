@@ -1,0 +1,169 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<meta
+			name="viewport"
+			content="width=device-width, initial-scale=1.0, shrink-to-fit=no"
+		/>
+		<title>FreeBrowse — Open Web</title>
+		<link rel="shortcut icon" href="favicon.ico" />
+
+		<!-- Proxy engine scripts — DO NOT remove or reorder these -->
+		<script src="/scram/scramjet.all.js"></script>
+		<script src="/baremux/index.js"></script>
+		<script src="register-sw.js" defer></script>
+		<script src="search.js" defer></script>
+		<script src="index.js" defer></script>
+
+		<style>
+			:root {
+				--bg: #0b1020;
+				--bg2: #131a32;
+				--card: rgba(255, 255, 255, 0.04);
+				--border: rgba(255, 255, 255, 0.12);
+				--text: #e8ecf6;
+				--muted: #9aa6c2;
+				--accent: #6ea8fe;
+				--accent2: #8b5cf6;
+				--danger: #ff7b7b;
+			}
+			* { box-sizing: border-box; }
+			html, body { height: 100%; margin: 0; }
+			body {
+				font-family: "Segoe UI", system-ui, -apple-system, Roboto, sans-serif;
+				color: var(--text);
+				background:
+					radial-gradient(900px 600px at 15% -10%, rgba(110,168,254,0.20), transparent 60%),
+					radial-gradient(800px 500px at 110% 10%, rgba(139,92,246,0.18), transparent 55%),
+					linear-gradient(160deg, var(--bg), var(--bg2));
+				min-height: 100%;
+				display: flex;
+				flex-direction: column;
+				align-items: center;
+				justify-content: center;
+				padding: 24px;
+			}
+			.wrap {
+				width: 100%;
+				max-width: 680px;
+				text-align: center;
+			}
+			.brand {
+				display: inline-flex;
+				align-items: center;
+				gap: 12px;
+				margin-bottom: 6px;
+			}
+			.brand .dot {
+				width: 14px; height: 14px; border-radius: 50%;
+				background: linear-gradient(135deg, var(--accent), var(--accent2));
+				box-shadow: 0 0 22px rgba(110,168,254,0.7);
+			}
+			h1 {
+				font-size: clamp(2rem, 6vw, 3rem);
+				margin: 0;
+				letter-spacing: -0.02em;
+				background: linear-gradient(135deg, #fff, #b9c6ef);
+				-webkit-background-clip: text;
+				background-clip: text;
+				color: transparent;
+			}
+			.tagline { color: var(--muted); margin: 10px 0 28px; font-size: 1.02rem; }
+			form {
+				display: flex;
+				gap: 8px;
+				background: var(--card);
+				border: 1px solid var(--border);
+				border-radius: 16px;
+				padding: 8px;
+				backdrop-filter: blur(8px);
+				box-shadow: 0 18px 50px rgba(0,0,0,0.45);
+			}
+			#sj-address {
+				flex: 1;
+				border: 0;
+				outline: 0;
+				background: transparent;
+				color: var(--text);
+				font-size: 1.05rem;
+				padding: 14px 16px;
+			}
+			#sj-address::placeholder { color: var(--muted); }
+			button {
+				border: 0;
+				cursor: pointer;
+				border-radius: 12px;
+				padding: 0 22px;
+				font-size: 1rem;
+				font-weight: 600;
+				color: #0b1020;
+				background: linear-gradient(135deg, var(--accent), var(--accent2));
+				transition: transform 0.08s ease, filter 0.15s ease;
+			}
+			button:hover { filter: brightness(1.08); }
+			button:active { transform: scale(0.97); }
+			.hint { color: var(--muted); font-size: 0.85rem; margin-top: 16px; line-height: 1.6; }
+			.hint b { color: #cdd7f2; font-weight: 600; }
+			#sj-error { color: var(--danger); margin: 14px 0 0; }
+			#sj-error-code { color: var(--muted); white-space: pre-wrap; font-size: 0.8rem; }
+			footer { margin-top: 30px; color: var(--muted); font-size: 0.78rem; }
+			footer a { color: var(--accent); text-decoration: none; }
+			footer a:hover { text-decoration: underline; }
+			/* The proxied page renders into a full-screen frame created by index.js */
+			#sj-frame {
+				position: fixed;
+				inset: 0;
+				width: 100%;
+				height: 100%;
+				border: 0;
+				z-index: 9999;
+				background: #fff;
+			}
+		</style>
+	</head>
+
+	<body>
+		<div class="wrap">
+			<div class="brand">
+				<span class="dot"></span>
+				<h1>FreeBrowse</h1>
+			</div>
+			<p class="tagline">Open the web freely — enter a URL or search below.</p>
+
+			<form id="sj-form">
+				<!-- Search engine used when the input isn't a URL. Change %s target if you like. -->
+				<input
+					id="sj-search-engine"
+					value="https://duckduckgo.com/?q=%s"
+					type="hidden"
+				/>
+				<input
+					id="sj-address"
+					type="text"
+					placeholder="https://wikipedia.org  —  or type to search"
+					autocomplete="off"
+					autocapitalize="off"
+					spellcheck="false"
+				/>
+				<button type="submit">Go</button>
+			</form>
+
+			<p id="sj-error"></p>
+			<pre id="sj-error-code"></pre>
+
+			<p class="hint">
+				<b>Works best on</b> reading-style sites (Wikipedia, blogs, docs, news).<br />
+				<b>Won't work:</b> Google/account logins, YouTube, and sites behind
+				Cloudflare or strict security headers — that's a limit of all web proxies,
+				not a bug here.
+			</p>
+
+			<footer>
+				Powered by
+				<a href="https://github.com/MercuryWorkshop/scramjet" rel="noreferrer">Scramjet</a>
+				(Mercury Workshop). For personal, lawful use only.
+			</footer>
+		</div>
+	</body>
+</html>
