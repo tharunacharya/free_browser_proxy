@@ -1,7 +1,6 @@
 {
-	"name": "Scramjet Demo",
-	"description": "Scramjet Demo App",
-	"repository": "https://github.com/.../Scramjet-Demo",
-	"logo": "https://raw.githubusercontent.com/MercuryWorkshop/scramjet/main/assets/scramjet.png",
-	"keywords": ["scramjet"]
+	"name": "FreeBrowse",
+	"description": "FreeBrowse — a self-hosted web proxy.",
+	"repository": "https://github.com/tharunacharya/free_browser_proxy",
+	"keywords": ["proxy", "web"]
 }

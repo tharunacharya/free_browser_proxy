@@ -1,7 +1,6 @@
 # Deploying FreeBrowse (free, public)
 
-This is a [Scramjet](https://github.com/MercuryWorkshop/scramjet) web proxy with a
-rebranded landing page, pre-configured to deploy on **Render's free tier**.
+FreeBrowse is a self-hosted web proxy, pre-configured to deploy on **Render's free tier**.
 
 > **Honest expectations.** This is a *personal-use* proxy. It handles reading-style
 > sites well (Wikipedia, blogs, docs, news). It will **not** work for Google/account

@@ -1,7 +1,7 @@
 {
-	"name": "scramjet-demo",
+	"name": "freebrowse",
 	"version": "2.0.0",
-	"description": "The demo application for Scramjet, a high-performance web proxy.",
+	"description": "FreeBrowse — a self-hosted web proxy.",
 	"type": "module",
 	"engines": {
 		"npm": ">=7.0.0",

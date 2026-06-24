@@ -1,74 +1,45 @@
-<p align="center"><img src="https://raw.githubusercontent.com/MercuryWorkshop/scramjet/main/assets/scramjet.png" height="200"></p>
+<h1 align="center">FreeBrowse</h1>
 
-<h1 align="center">Scramjet Demo</h1>
+<p align="center">A free, self-hosted web proxy with a live connection meter and multi-backend auto-switching.</p>
 
-The demo implementation of <a href="https://github.com/MercuryWorkshop/scramjet">Scramjet</a>, the most advanced web proxy.
+---
 
-<a href="https://github.com/MercuryWorkshop/scramjet">Scramjet</a> is an experimental interception based web proxy designed with security, developer friendliness, and performance in mind. This project is made to evade internet censorship and bypass arbitrary web browser restrictions.
+FreeBrowse lets you open websites through a server you control. Enter a URL (or a
+search term) and the page loads tunneled through your backend. It includes:
 
-#### Refer to <a href="https://github.com/HeyPuter/browser.js">browser.js</a> where this project will now receive updates outside of just bypassing internet censorship.
+- **Live meter board** — latency, download/upload speed, and the exit country/IP/ISP that sites see.
+- **Multi-backend auto-switching** — run it in several regions and it keeps the fastest one active.
+- **One-click free deploy** on Render's free tier.
 
-## Supported Sites
+## Deploy
 
-Scramjet has CAPTCHA support! Some of the popular websites that Scramjet supports include:
+See **[DEPLOY.md](DEPLOY.md)** for step-by-step instructions (GitHub → Render, free, no credit card).
 
-- [Google](https://google.com)
-- [Twitter](https://twitter.com)
-- [Instagram](https://instagram.com)
-- [Youtube](https://youtube.com)
-- [Spotify](https://spotify.com)
-- [Discord](https://discord.com)
-- [Reddit](https://reddit.com)
-- [GeForce NOW](https://play.geforcenow.com/)
+Quick version:
 
-Ensure you are not hosting on a datacenter IP for CAPTCHAs to work reliably along with YouTube. Heavy amounts of traffic will make some sites NOT work on a single IP. Consider rotating IPs or routing through Wireguard using a project like <a href="https://github.com/whyvl/wireproxy">wireproxy</a>.
-
-## Setup / Usage
-
-You will need Node.js 16.x (and above) and Git installed; below is an example for Debian/Ubuntu setup.
-
-```
-sudo apt update
-sudo apt upgrade
-sudo apt install curl git nginx
-
-curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh | bash
-
-export NVM_DIR="$HOME/.nvm"
-[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
-
-nvm install 20
-nvm use 20
-
-git clone https://github.com/MercuryWorkshop/Scramjet-App
-cd Scramjet-App
+```bash
+npm install
+node src/index.js     # serves on $PORT (default 8080)
 ```
 
-Install dependencies
+Requires **Node.js 16+**. Must be served over **HTTPS** (Render does this automatically)
+because it uses a Service Worker.
 
-```
-pnpm install
-```
+## Honest limits
 
-Run the server
+This is a **personal-use** proxy on a small free server. It handles reading-style
+sites well (Wikipedia, news, blogs, docs). It will **not** work for Google/account
+logins, YouTube, or sites behind Cloudflare or strict security headers — that's an
+inherent limit of every web proxy, not a bug. Don't use it for streaming video.
 
-```
-pnpm start
-```
+## Configuration
 
-Resources for self-hosting:
+- `public/backends.js` — list extra backends to switch between.
+- `public/index.html` — branding and default search engine.
+- `render.yaml` — deploy region and settings.
 
-- https://github.com/nvm-sh/nvm
-- https://docs.titaniumnetwork.org/guides/nginx/
-- https://docs.titaniumnetwork.org/guides/vps-hosting/
-- https://docs.titaniumnetwork.org/guides/dns-setup/
+---
 
-### HTTP Transport
-
-The example uses [libcurl-transport](https://github.com/MercuryWorkshop/libcurl-transport) to fetch proxied data encrypted.
-
-You may also want to use [epoxy-transport](https://github.com/MercuryWorkshop/epoxy-transport), a different way of fetching encrypted data.
-
-This example also now uses [wisp-js/server](https://www.npmjs.com/package/@mercuryworkshop/wisp-js) instead of the now outdated wisp-server-node. Please note that this can also be replaced with other wisp implementations like [wisp-server-python](https://github.com/MercuryWorkshop/wisp-server-python) which is highly recommended for production.
-
-See the [bare-mux](https://github.com/MercuryWorkshop/bare-mux) documentation for more information.
+<sub>Built on the open-source <a href="https://github.com/MercuryWorkshop/scramjet">Scramjet</a>
+proxy engine and <a href="https://github.com/MercuryWorkshop/wisp-js">wisp-js</a>.
+Licensed under <a href="LICENSE">AGPL-3.0</a> — source is provided in this repository as required.</sub>
