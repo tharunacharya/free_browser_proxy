@@ -1,7 +1,7 @@
 import { createServer } from "node:http";
 import { fileURLToPath } from "url";
 import { hostname } from "node:os";
-import { randomBytes } from "node:crypto";
+import { randomBytes, createHash, timingSafeEqual } from "node:crypto";
 import { server as wisp, logging } from "@mercuryworkshop/wisp-js/server";
 import Fastify from "fastify";
 import fastifyStatic from "@fastify/static";
@@ -21,6 +21,62 @@ Object.assign(wisp.options, {
 	dns_servers: ["1.1.1.3", "1.0.0.3"],
 });
 
+// ---------------------------------------------------------------------------
+// Optional access gate. Set ACCESS_PIN in the environment to require a PIN
+// before anyone can use the proxy (protects bandwidth + reduces the abuse that
+// gets free hosts suspended). Leave it unset and the site stays fully open.
+const ACCESS_PIN = (process.env.ACCESS_PIN || "").trim();
+const GATE_ON = ACCESS_PIN.length > 0;
+const COOKIE_NAME = "fb_access";
+const accessToken = GATE_ON
+	? createHash("sha256")
+			.update(`fb:${ACCESS_PIN}:${process.env.COOKIE_SECRET || ACCESS_PIN}`)
+			.digest("hex")
+	: "";
+if (GATE_ON && ACCESS_PIN.length < 8)
+	console.warn(
+		"[FreeBrowse] ACCESS_PIN is short — use a long, random value (10+ chars) to resist brute force."
+	);
+
+function parseCookies(header) {
+	const out = {};
+	if (!header) return out;
+	for (const part of header.split(";")) {
+		const i = part.indexOf("=");
+		if (i > -1) out[part.slice(0, i).trim()] = part.slice(i + 1).trim();
+	}
+	return out;
+}
+function hasAccess(req) {
+	if (!GATE_ON) return true;
+	return parseCookies(req.headers.cookie)[COOKIE_NAME] === accessToken;
+}
+
+// Tiny in-memory fixed-window rate limiter (per instance).
+const rlBuckets = new Map();
+function rateLimit(key, max, windowMs) {
+	const now = Date.now();
+	let e = rlBuckets.get(key);
+	if (!e || now > e.reset) {
+		e = { n: 0, reset: now + windowMs };
+		rlBuckets.set(key, e);
+	}
+	e.n++;
+	if (rlBuckets.size > 5000)
+		for (const [k, v] of rlBuckets) if (now > v.reset) rlBuckets.delete(k);
+	return e.n <= max;
+}
+function clientIp(req) {
+	const xff = req.headers["x-forwarded-for"];
+	if (xff) {
+		// Use the LAST hop (added by the trusted edge proxy); the leftmost value
+		// is client-supplied and therefore spoofable.
+		const parts = String(xff).split(",");
+		return parts[parts.length - 1].trim();
+	}
+	return req.ip || "unknown";
+}
+
 const fastify = Fastify({
 	serverFactory: (handler) => {
 		return createServer()
@@ -30,6 +86,7 @@ const fastify = Fastify({
 				handler(req, res);
 			})
 			.on("upgrade", (req, socket, head) => {
+				if (GATE_ON && !hasAccess(req)) return socket.end();
 				if (req.url.endsWith("/wisp/")) wisp.routeRequest(req, socket, head);
 				else socket.end();
 			});
@@ -91,6 +148,37 @@ fastify.addContentTypeParser(
 		payload.on("error", (err) => finish(err));
 	}
 );
+
+// Rate limiting + optional access gate (runs before every route).
+fastify.addHook("onRequest", (req, reply, done) => {
+	// CORS preflights carry no data/cookies — let them reach the OPTIONS route.
+	if (req.method === "OPTIONS") return done();
+
+	const path = req.url.split("?")[0];
+
+	if (path.startsWith("/api/")) {
+		if (!rateLimit("api:" + clientIp(req), 80, 10000))
+			return reply.code(429).send({ error: "rate limited" });
+	}
+
+	if (GATE_ON && !hasAccess(req)) {
+		// Unlock page + low-sensitivity, rate-limited measurement endpoints stay
+		// open, so cross-backend latency/geo probing still works against gated
+		// peers. The actual proxy tunnel (/wisp/) and pages remain gated.
+		if (
+			path === "/unlock" ||
+			path === "/favicon.ico" ||
+			path === "/robots.txt" ||
+			path === "/api/ping" ||
+			path === "/api/ipinfo"
+		)
+			return done();
+		if ((req.headers.accept || "").includes("text/html"))
+			return reply.code(302).header("location", "/unlock").send();
+		return reply.code(401).send({ error: "locked" });
+	}
+	done();
+});
 
 // CORS / CORP for all /api/* responses (needed for cross-backend probing under COEP).
 fastify.addHook("onRequest", (req, reply, done) => {
@@ -162,6 +250,46 @@ fastify.post("/api/speedtest", (req, reply) => {
 		(req.body && req.body.size) ||
 		Number(req.headers["content-length"] || 0);
 	reply.send({ ok: true, bytes });
+});
+
+// Access gate pages.
+fastify.get("/unlock", (req, reply) => {
+	if (!GATE_ON) return reply.code(302).header("location", "/").send();
+	return reply.type("text/html").sendFile("unlock.html");
+});
+fastify.post("/unlock", async (req, reply) => {
+	if (!GATE_ON) return reply.send({ ok: true });
+	// Per-IP AND global caps, so a spoofed X-Forwarded-For can't lift the limit.
+	if (
+		!rateLimit("unlock:" + clientIp(req), 6, 60000) ||
+		!rateLimit("unlock:global", 30, 60000)
+	)
+		return reply.code(429).send({ ok: false, error: "too many attempts" });
+	const pin = req.body && typeof req.body.pin === "string" ? req.body.pin : "";
+	const submitted = createHash("sha256")
+		.update(`fb:${pin}:${process.env.COOKIE_SECRET || ACCESS_PIN}`)
+		.digest("hex");
+	const ok =
+		submitted.length === accessToken.length &&
+		timingSafeEqual(Buffer.from(submitted), Buffer.from(accessToken));
+	if (ok) {
+		// Only mark the cookie Secure when actually served over HTTPS, otherwise
+		// the browser silently drops it and the unlock loops forever over HTTP.
+		const secure =
+			(req.headers["x-forwarded-proto"] || "").split(",")[0].trim() === "https";
+		reply.header(
+			"Set-Cookie",
+			`${COOKIE_NAME}=${accessToken}; HttpOnly;${secure ? " Secure;" : ""} SameSite=Lax; Path=/; Max-Age=2592000`
+		);
+		return reply.send({ ok: true });
+	}
+	await new Promise((r) => setTimeout(r, 300)); // slow brute force
+	return reply.code(401).send({ ok: false });
+});
+
+// Keep the proxy out of search engines.
+fastify.get("/robots.txt", (req, reply) => {
+	reply.type("text/plain").send("User-agent: *\nDisallow: /\n");
 });
 
 fastify.setNotFoundHandler((res, reply) => {

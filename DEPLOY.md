@@ -73,6 +73,19 @@ To actually get *faster* you need something to switch between. The biggest wins:
 > *resilient and self-optimizing*, not blazing. One small free instance has a hard
 > ceiling (0.1 CPU). Region + keep-alive matter more than the number of backends.
 
+## Lock it with a PIN (recommended for a public URL)
+
+An open proxy invites abuse and is what gets free hosts to suspend you. To require
+a PIN before anyone can use the site:
+
+1. Render dashboard → your service → **Environment** → add `ACCESS_PIN` = your secret.
+   **Use a long, random value (10+ characters)** — short numeric PINs are brute-forceable.
+2. Save (it redeploys). Now visitors hit an **Unlock** page first; the PIN is stored
+   in an HttpOnly cookie for 30 days.
+
+Leave `ACCESS_PIN` unset and the site stays fully open. (The API is also rate-limited
+either way.)
+
 ## Notes & gotchas
 
 - **Use Chrome or Edge.** The proxy relies on a Service Worker, which needs HTTPS —
