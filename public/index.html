@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en" data-theme="dark">
+<html lang="en">
 	<head>
 		<meta charset="utf-8" />
 		<meta
@@ -15,7 +15,6 @@
 		<script src="backends.js" defer></script>
 		<script src="register-sw.js" defer></script>
 		<script src="search.js" defer></script>
-		<script src="home.js" defer></script>
 		<script src="index.js" defer></script>
 		<!-- Meter board + auto-fastest backend switcher (loads after index.js) -->
 		<script src="dashboard.js" defer></script>
@@ -25,27 +24,12 @@
 				--bg: #0b1020;
 				--bg2: #131a32;
 				--card: rgba(255, 255, 255, 0.04);
-				--tile: rgba(255, 255, 255, 0.05);
 				--border: rgba(255, 255, 255, 0.12);
 				--text: #e8ecf6;
 				--muted: #9aa6c2;
 				--accent: #6ea8fe;
 				--accent2: #8b5cf6;
 				--danger: #ff7b7b;
-				--bar-bg: rgba(13, 18, 38, 0.97);
-			}
-			html[data-theme="light"] {
-				--bg: #eef2fb;
-				--bg2: #e2e8f6;
-				--card: rgba(12, 22, 50, 0.04);
-				--tile: rgba(12, 22, 50, 0.05);
-				--border: rgba(12, 22, 50, 0.14);
-				--text: #16203a;
-				--muted: #566077;
-				--accent: #3b6fe0;
-				--accent2: #7c3aed;
-				--danger: #d23b3b;
-				--bar-bg: rgba(255, 255, 255, 0.97);
 			}
 			* { box-sizing: border-box; }
 			html, body { height: 100%; margin: 0; }
@@ -53,8 +37,8 @@
 				font-family: "Segoe UI", system-ui, -apple-system, Roboto, sans-serif;
 				color: var(--text);
 				background:
-					radial-gradient(900px 600px at 15% -10%, rgba(110,168,254,0.18), transparent 60%),
-					radial-gradient(800px 500px at 110% 10%, rgba(139,92,246,0.16), transparent 55%),
+					radial-gradient(900px 600px at 15% -10%, rgba(110,168,254,0.20), transparent 60%),
+					radial-gradient(800px 500px at 110% 10%, rgba(139,92,246,0.18), transparent 55%),
 					linear-gradient(160deg, var(--bg), var(--bg2));
 				min-height: 100%;
 				display: flex;
@@ -63,274 +47,117 @@
 				justify-content: center;
 				padding: 24px;
 			}
-			.topbar {
-				position: fixed;
-				top: 14px;
-				right: 16px;
+			.wrap {
+				width: 100%;
+				max-width: 680px;
+				text-align: center;
 			}
-			.icon-btn {
-				background: var(--card);
-				border: 1px solid var(--border);
-				color: var(--text);
-				width: 40px;
-				height: 40px;
-				border-radius: 12px;
-				font-size: 18px;
-				cursor: pointer;
-			}
-			.icon-btn:hover { filter: brightness(1.1); }
-			.wrap { width: 100%; max-width: 700px; text-align: center; }
 			.brand {
 				display: inline-flex;
 				align-items: center;
 				gap: 12px;
-				margin-bottom: 4px;
+				margin-bottom: 6px;
 			}
-			.logo { display: block; }
+			.brand .dot {
+				width: 14px; height: 14px; border-radius: 50%;
+				background: linear-gradient(135deg, var(--accent), var(--accent2));
+				box-shadow: 0 0 22px rgba(110,168,254,0.7);
+			}
 			h1 {
 				font-size: clamp(2rem, 6vw, 3rem);
 				margin: 0;
 				letter-spacing: -0.02em;
-				background: linear-gradient(135deg, var(--accent), var(--accent2));
+				background: linear-gradient(135deg, #fff, #b9c6ef);
 				-webkit-background-clip: text;
 				background-clip: text;
 				color: transparent;
 			}
-			.tagline { color: var(--muted); margin: 10px 0 24px; font-size: 1.02rem; }
+			.tagline { color: var(--muted); margin: 10px 0 28px; font-size: 1.02rem; }
 			form {
 				display: flex;
-				gap: 6px;
-				align-items: center;
+				gap: 8px;
 				background: var(--card);
 				border: 1px solid var(--border);
 				border-radius: 16px;
 				padding: 8px;
 				backdrop-filter: blur(8px);
-				box-shadow: 0 18px 50px rgba(0, 0, 0, 0.35);
-				flex-wrap: wrap;
-			}
-			#fb-engine {
-				border: 0;
-				background: var(--tile);
-				color: var(--text);
-				border-radius: 10px;
-				padding: 10px 8px;
-				font-size: 0.9rem;
-				cursor: pointer;
-				outline: 0;
+				box-shadow: 0 18px 50px rgba(0,0,0,0.45);
 			}
 			#sj-address {
 				flex: 1;
-				min-width: 180px;
 				border: 0;
 				outline: 0;
 				background: transparent;
 				color: var(--text);
 				font-size: 1.05rem;
-				padding: 12px 14px;
+				padding: 14px 16px;
 			}
 			#sj-address::placeholder { color: var(--muted); }
-			form .go {
+			button {
 				border: 0;
 				cursor: pointer;
 				border-radius: 12px;
 				padding: 0 22px;
-				height: 44px;
 				font-size: 1rem;
 				font-weight: 600;
 				color: #0b1020;
 				background: linear-gradient(135deg, var(--accent), var(--accent2));
+				transition: transform 0.08s ease, filter 0.15s ease;
 			}
-			form .go:hover { filter: brightness(1.08); }
-			form .save {
-				border: 1px solid var(--border);
-				background: var(--tile);
-				color: var(--accent);
-				border-radius: 12px;
-				height: 44px;
-				width: 44px;
-				font-size: 1.1rem;
-				cursor: pointer;
-			}
-			form .save:hover { filter: brightness(1.15); }
+			button:hover { filter: brightness(1.08); }
+			button:active { transform: scale(0.97); }
+			.hint { color: var(--muted); font-size: 0.85rem; margin-top: 16px; line-height: 1.6; }
+			.hint b { color: #cdd7f2; font-weight: 600; }
 			#sj-error { color: var(--danger); margin: 14px 0 0; }
 			#sj-error-code { color: var(--muted); white-space: pre-wrap; font-size: 0.8rem; }
-
-			.section { margin-top: 26px; text-align: left; }
-			.section h3 {
-				font-size: 0.78rem;
-				text-transform: uppercase;
-				letter-spacing: 0.06em;
-				color: var(--muted);
-				margin: 0 0 10px;
-			}
-			.section-head {
-				display: flex;
-				justify-content: space-between;
-				align-items: center;
-			}
-			.link {
-				background: none;
-				border: 0;
-				color: var(--accent);
-				cursor: pointer;
-				font-size: 0.78rem;
-			}
-			.tiles { display: flex; flex-wrap: wrap; gap: 8px; }
-			.fb-tile {
-				display: flex;
-				align-items: center;
-				gap: 6px;
-				background: var(--tile);
-				border: 1px solid var(--border);
-				border-radius: 10px;
-				padding: 8px 10px;
-				font-size: 0.9rem;
-			}
-			.fb-tile-label { cursor: pointer; max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-			.fb-tile-label:hover { color: var(--accent); }
-			.fb-tile-x {
-				border: 0;
-				background: none;
-				color: var(--muted);
-				cursor: pointer;
-				font-size: 1.1rem;
-				line-height: 1;
-			}
-			.fb-tile-x:hover { color: var(--danger); }
-			.fb-empty { color: var(--muted); font-size: 0.85rem; margin: 0; }
-			.chips { display: flex; flex-wrap: wrap; gap: 6px; }
-			.fb-chip {
-				background: var(--tile);
-				border: 1px solid var(--border);
-				color: var(--text);
-				border-radius: 999px;
-				padding: 6px 12px;
-				font-size: 0.82rem;
-				cursor: pointer;
-				max-width: 100%;
-				overflow: hidden;
-				text-overflow: ellipsis;
-				white-space: nowrap;
-			}
-			.fb-chip:hover { border-color: var(--accent); }
-
-			.hint { color: var(--muted); font-size: 0.85rem; margin-top: 26px; line-height: 1.6; }
-			.hint b { color: var(--text); font-weight: 600; }
-			footer { margin-top: 26px; color: var(--muted); font-size: 0.78rem; }
+			footer { margin-top: 30px; color: var(--muted); font-size: 0.78rem; }
 			footer a { color: var(--accent); text-decoration: none; }
 			footer a:hover { text-decoration: underline; }
-
-			/* ---- proxied page: navigation toolbar + frame + spinner ---- */
-			#sj-bar {
-				position: fixed;
-				top: 0;
-				left: 0;
-				right: 0;
-				height: 48px;
-				z-index: 10000;
-				display: flex;
-				align-items: center;
-				gap: 6px;
-				padding: 0 10px;
-				background: var(--bar-bg);
-				border-bottom: 1px solid var(--border);
-				backdrop-filter: blur(8px);
-			}
-			.sj-btn {
-				border: 0;
-				background: transparent;
-				color: var(--text);
-				width: 34px;
-				height: 34px;
-				border-radius: 8px;
-				font-size: 16px;
-				cursor: pointer;
-			}
-			.sj-btn:hover { background: var(--tile); }
-			.sj-btn.close { color: var(--danger); }
-			#sj-bar-url {
-				flex: 1;
-				height: 34px;
-				border-radius: 8px;
-				border: 1px solid var(--border);
-				background: var(--card);
-				color: var(--text);
-				padding: 0 12px;
-				outline: 0;
-				font-size: 13px;
-				min-width: 80px;
-			}
+			/* The proxied page renders into a full-screen frame created by index.js */
 			#sj-frame {
 				position: fixed;
-				top: 48px;
-				left: 0;
-				right: 0;
-				bottom: 0;
+				inset: 0;
 				width: 100%;
-				height: calc(100% - 48px);
+				height: 100%;
 				border: 0;
-				z-index: 9990;
+				z-index: 9999;
 				background: #fff;
 			}
-			#sj-spinner {
+			/* Close/back control shown while a proxied page is open */
+			#sj-close {
 				position: fixed;
-				top: 48px;
-				left: 0;
-				right: 0;
-				bottom: 0;
-				z-index: 9995;
-				display: flex;
-				align-items: center;
-				justify-content: center;
-				background: rgba(8, 12, 24, 0.85);
+				top: 12px;
+				left: 12px;
+				z-index: 2147483001;
+				background: rgba(13, 16, 32, 0.92);
+				color: #e8ecf6;
+				border: 1px solid rgba(255, 255, 255, 0.2);
+				border-radius: 10px;
+				padding: 8px 14px;
+				font-size: 13px;
+				font-weight: 600;
+				cursor: pointer;
+				box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
 			}
-			.sj-ring {
-				width: 46px;
-				height: 46px;
-				border-radius: 50%;
-				border: 4px solid rgba(255, 255, 255, 0.2);
-				border-top-color: var(--accent);
-				animation: sj-spin 0.8s linear infinite;
-			}
-			@keyframes sj-spin { to { transform: rotate(360deg); } }
-
-			@media (max-width: 600px) {
-				body { padding: 16px; }
-				form { gap: 6px; }
-				#sj-address { min-width: 120px; }
-				.fb-tile-label { max-width: 130px; }
-				#sj-bar { gap: 2px; padding: 0 6px; }
-				.sj-btn { width: 30px; }
-			}
+			#sj-close:hover { background: rgba(255, 90, 90, 0.9); }
 		</style>
 	</head>
 
 	<body>
-		<div class="topbar">
-			<button id="fb-theme" class="icon-btn" title="Toggle light/dark">☀️</button>
-		</div>
-
 		<div class="wrap">
 			<div class="brand">
-				<svg class="logo" viewBox="0 0 48 48" width="34" height="34" aria-hidden="true">
-					<defs>
-						<linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
-							<stop offset="0" stop-color="#6ea8fe" />
-							<stop offset="1" stop-color="#8b5cf6" />
-						</linearGradient>
-					</defs>
-					<circle cx="24" cy="24" r="20" fill="none" stroke="url(#g)" stroke-width="3" />
-					<ellipse cx="24" cy="24" rx="8" ry="20" fill="none" stroke="url(#g)" stroke-width="2.5" />
-					<line x1="4" y1="24" x2="44" y2="24" stroke="url(#g)" stroke-width="2.5" />
-				</svg>
+				<span class="dot"></span>
 				<h1>FreeBrowse</h1>
 			</div>
 			<p class="tagline">Open the web freely — enter a URL or search below.</p>
 
 			<form id="sj-form">
-				<input id="sj-search-engine" type="hidden" value="https://duckduckgo.com/?q=%s" />
-				<select id="fb-engine" title="Search engine"></select>
+				<!-- Search engine used when the input isn't a URL. Change %s target if you like. -->
+				<input
+					id="sj-search-engine"
+					value="https://duckduckgo.com/?q=%s"
+					type="hidden"
+				/>
 				<input
 					id="sj-address"
 					type="text"
@@ -339,25 +166,11 @@
 					autocapitalize="off"
 					spellcheck="false"
 				/>
-				<button type="submit" class="go">Go</button>
-				<button type="button" id="fb-save" class="save" title="Save current address as a bookmark">★</button>
+				<button type="submit">Go</button>
 			</form>
 
 			<p id="sj-error"></p>
 			<pre id="sj-error-code"></pre>
-
-			<section class="section">
-				<h3>Bookmarks</h3>
-				<div id="fb-bookmarks" class="tiles"></div>
-			</section>
-
-			<section class="section">
-				<div class="section-head">
-					<h3>Recent</h3>
-					<button id="fb-history-clear" class="link" style="display:none">Clear</button>
-				</div>
-				<div id="fb-history" class="chips"></div>
-			</section>
 
 			<p class="hint">
 				<b>Works best on</b> reading-style sites (Wikipedia, blogs, docs, news).<br />

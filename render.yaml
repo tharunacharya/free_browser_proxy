@@ -23,9 +23,3 @@ services:
       # label per deployment (e.g. "Singapore", "Frankfurt") when you run several.
       - key: REGION_LABEL
         value: "Singapore"
-      # Optional access PIN. Leave unset and the site is fully open. Set it to
-      # require a PIN before anyone can use the proxy (recommended for a public
-      # URL — protects bandwidth and lowers suspension risk). Use a LONG, RANDOM
-      # value (10+ chars) — short PINs are brute-forceable. Uncomment + redeploy:
-      # - key: ACCESS_PIN
-      #   value: "change-me-to-a-long-random-string"

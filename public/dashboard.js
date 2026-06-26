@@ -241,7 +241,6 @@
  .fb-mode{font-size:11px;color:#9aa6c2}
  .fb-mode b{color:#6ea8fe}
  .fb-x{cursor:pointer;color:#9aa6c2;font-size:14px}
- @media (max-width:600px){#fb-dash{right:8px;bottom:8px}#fb-panel{width:calc(100vw - 24px)}}
 </style>
 <div id="fb-badge" title="Connection meter — click for details">
   <span class="pulse" id="fb-pulse"></span>
