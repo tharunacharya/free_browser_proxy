@@ -14,3 +14,8 @@ async function handleRequest(event) {
 self.addEventListener("fetch", (event) => {
 	event.respondWith(handleRequest(event));
 });
+
+// Take control of open pages as soon as possible — on mobile the proxied frame
+// can render before the SW is controlling it, which leaves it blank.
+self.addEventListener("install", () => self.skipWaiting());
+self.addEventListener("activate", (event) => event.waitUntil(self.clients.claim()));

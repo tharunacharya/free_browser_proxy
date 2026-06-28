@@ -9,6 +9,48 @@
 		<title>FreeBrowse — Open Web</title>
 		<link rel="shortcut icon" href="favicon.ico" />
 
+		<!-- Mobile diagnostics: turn a silent white frame into a readable error.
+		     The red box only appears if something actually throws. Add ?debug=1
+		     to the URL to also see a device-capability banner. Self-contained
+		     (no external scripts) so COEP can't block it. -->
+		<script>
+			(function () {
+				function box() {
+					var e = document.getElementById("fb-errbox");
+					if (!e) {
+						e = document.createElement("pre");
+						e.id = "fb-errbox";
+						e.style.cssText =
+							"position:fixed;bottom:0;left:0;right:0;z-index:2147483647;margin:0;padding:10px;background:#330; color:#ff9b9b;font:11px/1.5 monospace;white-space:pre-wrap;max-height:45%;overflow:auto";
+						(document.body || document.documentElement).appendChild(e);
+					}
+					return e;
+				}
+				window.addEventListener("error", function (ev) {
+					box().textContent += "ERR: " + (ev.message || ev.error) + "\n";
+				});
+				window.addEventListener("unhandledrejection", function (ev) {
+					box().textContent +=
+						"PROMISE: " + ((ev.reason && ev.reason.message) || ev.reason) + "\n";
+				});
+				if (new URLSearchParams(location.search).has("debug")) {
+					document.addEventListener("DOMContentLoaded", function () {
+						var d = document.createElement("div");
+						d.style.cssText =
+							"position:fixed;top:0;left:0;right:0;z-index:2147483647;background:#001;color:#7cfc00;font:11px monospace;padding:5px;white-space:pre-wrap";
+						d.textContent =
+							"COI=" + self.crossOriginIsolated +
+							"  SAB=" + (typeof SharedArrayBuffer !== "undefined") +
+							"  WASM=" + (typeof WebAssembly !== "undefined") +
+							"  SWctrl=" +
+							!!(navigator.serviceWorker && navigator.serviceWorker.controller) +
+							"  RAM=" + (navigator.deviceMemory || "?") + "GB";
+						document.body.appendChild(d);
+					});
+				}
+			})();
+		</script>
+
 		<!-- Proxy engine scripts — DO NOT remove or reorder these -->
 		<script src="/scram/scramjet.all.js"></script>
 		<script src="/baremux/index.js"></script>
@@ -118,7 +160,8 @@
 				position: fixed;
 				inset: 0;
 				width: 100%;
-				height: 100%;
+				height: 100vh; /* fallback */
+				height: 100dvh; /* avoids mobile toolbar collapse */
 				border: 0;
 				z-index: 9999;
 				background: #fff;
